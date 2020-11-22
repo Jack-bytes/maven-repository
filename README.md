@@ -1,8 +1,8 @@
 # Maven Repository For Everyone
 
 ### information
-- author: Jack
-- contact me: Tencent QQ 78700393
+- **author :** Jack
+- **contact me :** Tencent QQ 78700393
 
 
 ### What is this repository for;
