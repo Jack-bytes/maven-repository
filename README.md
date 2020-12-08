@@ -39,7 +39,6 @@
             <id>1.8-GitHub</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
-                <jdk>1.8</jdk>
             </activation>
             <properties>
                 <maven.compiler.source>1.8</maven.compiler.source>
