@@ -65,4 +65,4 @@
     </profiles>
 </settings>
 ```
-- add dependency to your project pom.xml;
+- add dependency to pom.xml in your project ;
