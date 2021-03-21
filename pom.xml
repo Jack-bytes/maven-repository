@@ -6,6 +6,201 @@
 
     <groupId>cn.com.lezz</groupId>
     <artifactId>maven-repository</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
+
+    <properties>
+        <!-- maven-resources-plugin 插件将自动使用此编码 -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <developer.example>Jack Wang</developer.example>
+    </properties>
+
+
+    <!-- deploy配置 -->
+    <distributionManagement>
+        <repository>
+            <!-- 如果仓库有密码的,则此id需要与settings.xml中的server标签的id相同 -->
+            <id>myRemoteRepository</id>
+            <name>personal-repo</name>
+            <url>ftp://repository.mycompany.com/repository</url>
+            <uniqueVersion>true</uniqueVersion>
+            <layout>default</layout>
+        </repository>
+    </distributionManagement>
+
+
+    <build>
+
+        <!-- deploy配置,使用ftp协议传输才用,用http就不用配置; -->
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ftp</artifactId>
+                <version>3.3.4</version>
+            </extension>
+        </extensions>
+
+
+        <filters>
+            <filter>others/config/mavenFilterConfig.properties</filter>
+        </filters>
+        <resources>
+            <!-- Maven的默认路径是src/main/java, 也可以增加路径, 且可以增加多个 -->
+            <resource>
+                <!-- 像这样表示是在项目目录下的directory/xxxx -->
+                <directory>directory/xxxx</directory>
+                <!-- 此标签作用: 为true表示当前resource中文件可以使用 ${someElement} 替换符, someElement 有3种方式取数据
+                 1. 在properties标签中定义名字;
+                 2. 在build.filters.filter标签中定义数据文件, 就是上面那个标签;
+                 3. project根标签下直接写;
+                 优先级分别是1.2.3 -->
+                <!-- http://maven.apache.org/plugins/maven-resources-plugin/examples/filter.html -->
+                <filtering>true</filtering>
+
+                <!-- 包含此目录下及子目录下的所有xml文件,如果指定,则当前目录下只会包含此配置中的文件 -->
+                <!--                <includes>-->
+                <!--                    <include>**/*.xml</include>-->
+                <!--                </includes>-->
+
+                <!-- 排除此目录下及子目录下的所有png文件, -->
+                <excludes>
+                    <exclude>**/*.png</exclude>
+                </excludes>
+            </resource>
+        </resources>
+
+        <pluginManagement>
+
+            <plugins>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.2.0</version>
+                    <configuration>
+                        <!-- 插件默认使用<properties>中的编码, 也可以在这里自定义 -->
+                        <encoding>UTF-8</encoding>
+
+                        <!-- 如果启动了filter，并且过滤的文件中有.properties文件,且文件中包含非 ASCII字符,
+                        且encoding的编码为ISO-8859-1外的其他值,同时满足4个条件,则需要配置此标签,配置成对应的编码,不一定是GBK; -->
+                        <!--                        <propertiesEncoding>GBK</propertiesEncoding>-->
+
+                        <!-- 指定不被过滤的文件类型后缀名, 某些二进制文件,就是不是文字的,不排除可能被过滤导致文件出错, 比如图片
+                        过滤指的是在build.resources中配置的过滤; -->
+                        <nonFilteredFileExtensions>
+                            <nonFilteredFileExtension>png</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
+                        </nonFilteredFileExtensions>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.2.0</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <!-- 向jar包META-INF/MANIFEST.MF文件中添加一些被默认省略的东西 http://maven.apache.org/shared/maven-archiver/examples/manifest.html -->
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                <!-- 是否添加类路径到META-INF/MANIFEST.MF文件中 -->
+                                <addClasspath>true</addClasspath>
+                                <!-- 这个prefix可以设置成${user.home}/.m2/repository/ 因为一般本地仓库就在那里,
+                                然后classpath的样式就像下面那个那样设置, 这样不用把依赖拷贝出来都可以运行,但是只能在当前环境,如果不熟到Linux,必须要Linux也要有本地库,且依赖要全; -->
+                                <classpathPrefix>lib/</classpathPrefix>
+                                <!-- 指定classpath中路径样式, repository表示和本地仓库那种形式一样 -->
+                                <!--                            <classpathLayoutType>repository</classpathLayoutType>-->
+                                <!-- 可执行jar包必填项 -->
+                                <mainClass>com.test.Test</mainClass>
+                            </manifest>
+                            <!-- 也可以自定义往META-INF/MANIFEST.MF文件中添加, 添加结果就是增加一行 developer: Jack Wang -->
+                            <manifestEntries>
+                                <!-- 可以使用properties中定义的值 -->
+                                <developer>${developer.example}</developer>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.1.2</version>
+                    <executions>
+                        <execution>
+                            <id>copy-dependencies</id><!-- 这个id是为了项目继承这个项目时进行配置合并作用的 -->
+                            <phase>package</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.basedir}/target/lib</outputDirectory>
+                                <overWriteReleases>false</overWriteReleases>
+                                <overWriteSnapshots>false</overWriteSnapshots>
+                                <overWriteIfNewer>true</overWriteIfNewer>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <!-- 将project打包成UBER-JAR, UBER-JAR的意思是super-jar, 意思是包含依赖的jar包; -->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.2.4</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                            <configuration>
+                                <transformers>
+                                    <!-- 此处implementation 还有很多其他功能: http://maven.apache.org/plugins/maven-shade-plugin/examples/resource-transformers.html-->
+                                    <transformer
+                                            implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                        <mainClass>com.test.Test</mainClass>
+                                    </transformer>
+                                </transformers>
+                                <artifactSet>
+                                    <!-- 排除依赖jar包, 书写格式 groupId:artifactId 可用匹配符 * ? -->
+                                    <excludes>
+                                        <exclude>com.alibaba:*</exclude>
+                                    </excludes>
+                                </artifactSet>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <!-- 和shade是一样的 -->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>3.3.0</version>
+                    <executions>
+                        <execution>
+                            <id>make-assembly</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <descriptorRefs>jar-with-dependencies</descriptorRefs>
+                        <archive>
+                            <manifest>
+                                <!-- main方法类路径; -->
+                                <mainClass>com.test.Test</mainClass>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                </plugin>
+
+            </plugins>
+
+        </pluginManagement>
+    </build>
 
 </project>
