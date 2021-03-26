@@ -22,9 +22,17 @@
             <id>myRemoteRepository</id>
             <name>personal-repo</name>
             <url>ftp://repository.mycompany.com/repository</url>
-            <uniqueVersion>true</uniqueVersion>
             <layout>default</layout>
         </repository>
+        <!-- 带有 -SNAPSHOT 后缀如果deploy就会发布到快照仓库,没有则是releases仓库 -->
+        <snapshotRepository>
+            <id>snapshot</id>
+            <name>snapshotRepository</name>
+            <url>https://maven.pkg.github.com/jack-bytes/maven-repository</url>
+            <!-- 此配置只针对快照版本配置, 功能: 是否对快照版本生成构建号和时间戳组成的唯一版本; -->
+            <uniqueVersion>true</uniqueVersion>
+            <layout>default</layout>
+        </snapshotRepository>
     </distributionManagement>
 
 
