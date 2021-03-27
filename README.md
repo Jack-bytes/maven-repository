@@ -19,7 +19,7 @@
     <!-- if the setting.xml already have a servers tag, please just append server tag into servers; -->
     <servers>
         <server>
-            <id>GitHub</id>
+            <id>github</id>
             <username>jack-bytes</username>
             <password>replace with github token, please get from author of this repository</password>
         </server>
@@ -29,25 +29,20 @@
         <mirror>
             <id>ali</id>
             <name>ali Maven</name>
-            <mirrorOf>*,!GitHub</mirrorOf>
+            <mirrorOf>*,!github</mirrorOf>
             <url>https://maven.aliyun.com/repository/public/</url>
         </mirror>
     </mirrors>
     
     <profiles>
         <profile>
-            <id>1.8-GitHub</id>
+            <id>github-repo</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
-            <properties>
-                <maven.compiler.source>1.8</maven.compiler.source>
-                <maven.compiler.target>1.8</maven.compiler.target>
-                <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
-            </properties>
             <repositories>
                 <repository>
-                    <id>GitHub</id>
+                    <id>github</id>
                     <name>GitHubRepository</name>
                     <url>https://maven.pkg.github.com/jack-bytes/maven-repository</url>
                     <layout>default</layout>
